@@ -82,6 +82,8 @@ Make the history buffer prettier (Let git colour it or have syntax highlighting)
 
 BDD defaults
 
+Deployment (gem / vimball / apt)
+
 Possibly add a cleanup command to free up disk space by git-bisecting out old
 commits
 

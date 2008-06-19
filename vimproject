@@ -1,0 +1,23 @@
+vlh="/home/davidjh/devel/vimlocalhist" CD="." filter="*" {
+ README
+ Rakefile
+ irb_util.rb
+ vimlocalhistory-test.vim
+ vimproject
+ src="src" filter="*" {
+  errors.rb
+  lang_utils.rb
+  repository.rb
+  vim_wrapper.rb
+  vimlocalhistory.vim
+  vlh.rb
+ }
+ spec="spec" filter="*" {
+  lang_utils_spec.rb
+  repository_spec.rb
+  spec_helper.rb
+  assets="assets" filter="*" {
+   sample_file.txt
+  }
+ }
+}

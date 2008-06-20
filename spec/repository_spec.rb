@@ -1,8 +1,6 @@
 
 require 'fileutils'
 
-require 'rubygems'
-require 'ruby-debug'
 require 'spec/spec_helper'
 
 require 'repository'

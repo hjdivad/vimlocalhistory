@@ -1,9 +1,10 @@
 vlh="/home/davidjh/devel/vimlocalhist" CD="." filter="*" {
  README
  Rakefile
+ config.rb
  irb_util.rb
+ tags
  vimlocalhistory-test.vim
- vimproject
  src="src" filter="*" {
   errors.rb
   lang_utils.rb
@@ -16,8 +17,10 @@ vlh="/home/davidjh/devel/vimlocalhist" CD="." filter="*" {
   lang_utils_spec.rb
   repository_spec.rb
   spec_helper.rb
+  vim_wrapper_spec.rb
   assets="assets" filter="*" {
    sample_file.txt
+   sample_file_symlink
   }
  }
 }

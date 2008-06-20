@@ -1,4 +1,6 @@
 require 'spec'
+require 'rubygems'
+require 'ruby-debug'
 
 module VimLocalHistory end
 module VimLocalHistory::SpecHelper
@@ -22,5 +24,13 @@ module VimLocalHistory::SpecHelper
 		File.open( path, 'a') do |file|
 			file.puts "Another line added"
 		end
+	end
+
+	# Adds stub methods to the mock Vim class so that spec doesn't complain
+	# about any unexpected methods -- only appropriate for some specs
+	def stub_mock_vim
+		Vim.stub!(:command)
+		Vim.stub!(:evaluate)
+		Vim.stub!(:message)
 	end
 end

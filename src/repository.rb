@@ -1,25 +1,27 @@
 require 'fileutils'
 
+require 'lang_utils'
 require 'errors'
 
 module VimLocalHistory end
 class VimLocalHistory::Repository
 
-	attr_reader :location
 
-
-	def initialize( location)
-		@location = location
+	def initialize( location=nil, &block)
+		if block_given? and not location
+			@location_proc = Proc.new &block
+		elsif location
+			@location_proc = Proc.new { location }
+		else
+			raise ArgumentError.new(
+				"Either a location must be specified, or a block that returns
+				the location must be given".compact!
+			)
+		end
 	end
 
 	def enabled?
-		@enabled = check_enabled if @enabled.nil?
-		@enabled
-	end
-
-	def initialized?
-		return false unless enabled?
-		File.exists? "#{@location}/.git"
+		check_enabled
 	end
 
 
@@ -30,23 +32,41 @@ class VimLocalHistory::Repository
 	end
 
 
+
+	def location
+		loc = @location_proc.call
+		if block_given?
+			yield loc
+		else
+			loc
+		end
+	end
+
+
 	private
 
+	def initialized?
+		return false unless enabled?
+		File.exists? "#{location}/.git"
+	end
+
 	def check_enabled
-		File.exists?( @location) and
-			File.new( @location).stat.writable?
+		location do |loc|
+			File.exists?( loc) and
+				File.new( loc).stat.writable?
+		end
 	end
 
 	def ensure_repository_initialized
 		raise CannotInitializeRepositoryError.new(
-			"#{@location} does not exist or is not writable"
+			"#{location} does not exist or is not writable"
 		) unless enabled?
 
 		initialize_repository unless initialized?
 	end
 
 	def initialize_repository
-		system "cd #{@location} && touch .gitignore && git-init > /dev/null "
+		system "cd #{location} && touch .gitignore && git-init > /dev/null "
 		git_add_and_commit_all(
 			"Initial commit from VimLocalHistory"
 		)
@@ -63,7 +83,7 @@ class VimLocalHistory::Repository
 	end
 
 	def copy_local_file_to_repository( path)
-		repo_dir = File.dirname("#{@location}/#{path}")
+		repo_dir = File.dirname("#{location}/#{path}")
 
 		FileUtils.mkdir_p repo_dir
 		FileUtils.cp path, repo_dir
@@ -77,7 +97,7 @@ class VimLocalHistory::Repository
 	def git_add_and_commit_all( msg="Commit from VimLocalHistory")
 		#FIXME: quotesafe message
 		#FIXME: error if msg nil or empty
-		system "cd #{@location} && 
+		system "cd #{location} && 
 				git add * &&  
 				git commit --all -m \"#{msg}\" \
 					> /dev/null"

@@ -35,7 +35,8 @@ desc <<-EOS
 	Launch a testing instance of vim
 EOS
 task :test do
-	system 'vim +"so vimlocalhistory-test.vim"'
+	FileUtils.mkdir_p 'test/repo'
+	system 'vim +"let g:vlh_repository_dir=\'test/repo\'" +"so vimlocalhistory-test.vim"'
 end
 
 task :clean do
@@ -53,7 +54,7 @@ namespace :spec do
 		Runs specs and produces an html report in report/report.html
 	EOS
 	Spec::Rake::SpecTask.new(:html) do |t|
-		directory 'report'
+		FileUtils.mkdir_p 'report'
 
 		t.ruby_opts = ['-rconfig']
 		t.spec_opts = ['--color --format html:report/report.html --format specdoc']

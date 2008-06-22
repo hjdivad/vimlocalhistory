@@ -9,6 +9,9 @@ require 'spec/rake/spectask'
 require 'lang_utils'
 
 
+VLH_VERSION='0.1'
+
+
 install_source = Dir.glob('./src/*')
 install_target = ENV['INSTALL_TARGET'] || "#{ENV['HOME']}/.vim/plugin"
 installed_names = install_source.map do |path|
@@ -17,6 +20,8 @@ installed_names = install_source.map do |path|
 end
 
 
+########################################################################
+# Installation and packaging tasks
 desc <<-EOS
 	Install The plugin to ~/.vim/plugin
 EOS
@@ -32,18 +37,40 @@ task :uninstall do
 end
 
 desc <<-EOS
+	Creates a tarball for distribution via, e.g. vim.org scripts
+EOS
+task :tarball do
+	FileUtils.rm "vimlocalhistory-#{VLH_VERSION}.tar.gz", :force => true
+
+	system "tar cf vimlocalhistory-#{VLH_VERSION}.tar
+		--transform='s,^src/(.*),plugin/\\1,x' src/*".compact!
+
+	system "tar rf vimlocalhistory-#{VLH_VERSION}.tar INSTALL"
+	system "gzip vimlocalhistory-#{VLH_VERSION}.tar"
+end
+
+desc <<-EOS
+	Cleans up the working directory, removing most generated files
+EOS
+task :clean do
+	FileUtils.rm_r [
+		'./test', './report',
+		"./vimlocalhistory-#{VLH_VERSION}.tar.gz"
+	], :force => true
+end
+
+
+########################################################################
+# Testing (incl. spec) tasks
+
+desc <<-EOS
 	Launch a testing instance of vim
 EOS
+
 task :test do
 	FileUtils.mkdir_p 'test/repo'
 	system 'vim +"let g:vlh_repository_dir=\'test/repo\'" +"so vimlocalhistory-test.vim"'
 end
-
-task :clean do
-	FileUtils.rm_r ['./test', './report', './tags'], :force => true
-end
-
-
 Spec::Rake::SpecTask.new do |t|
 	t.ruby_opts = ['-rconfig']
 	t.spec_opts = ['--color --format specdoc']
@@ -75,3 +102,4 @@ namespace :spec do
 		system "rdebug rake -- spec:trace"
 	end
 end
+########################################################################

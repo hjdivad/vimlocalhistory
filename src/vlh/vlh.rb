@@ -1,5 +1,6 @@
 pdir = File.dirname(__FILE__)
 $: << pdir unless $:.include? pdir
+$: << "#{pdir}/vlh" unless $:.include? "#{pdir}/vlh"
 
 require 'vim_wrapper'
 require 'repository'
@@ -22,8 +23,14 @@ class VimLocalHistory::VimIntegration
 	def setup_vim_event_hooks
 		Vim::on(:BufWritePost, 'VimLocalHistory') do 
 			begin
-				@repository.commit_file( Vim::Buffer.current.name) if 
-					@repository.enabled?
+				if @repository.enabled?
+					@repository.commit_file( Vim::Buffer.current.name)
+				elsif not @repository.location.empty?
+					# g:vlh_repository_dir was set, but we can't write to it
+					print "VimLocalHisotry -- Unable to write to
+						g:vlh_repository_dir (the repository location) --
+						'#{@repository.location}'".compact!
+				end
 			rescue => e
 				# UnimplementedFeatureError for scp://* files will generate a
 				# message here, but won't actually be shown to the user because

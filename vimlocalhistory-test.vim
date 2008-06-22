@@ -2,8 +2,9 @@ function! Reload()
 	if exists("g:loaded_vlh")
 		unlet g:loaded_vlh
 		ruby << EOS
-			load 'vim_wrapper.rb'
-			load 'repository.rb'
+			require 'config'
+			load 'src/vlh/vim_wrapper.rb'
+			load 'src/vlh/repository.rb'
 EOS
 	endif
 	source src/vimlocalhistory.vim

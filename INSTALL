@@ -1,0 +1,8 @@
+To install, copy the contents of plugin to your user-specific vim plugin
+directory, probably ~/.vim/plugin/
+
+Then make sure to edit your ~/.vimrc to include
+
+let g:vlh_repostiroy_dir = "/path/where/youd/like/to/store/localhistory"
+
+I suggest using /home/$USER/.vim/localhistory

@@ -77,19 +77,13 @@ g:vlh_log_command
 
 TODO
 =====
-cleanup vim deployment
-	- move src/* to subdir, sans vimlocalhistory.vim
-	- add a task to create a tar.gz that can be untarred into ~/.vim
-		/plugin/
-			vimlocalhistory.vim
-			/vimlocalhistory/*
-
 hand it off to earl
 
 Implement File history buffer
 Finish file history buffer (diff item / open item / restore item)
 Make the history buffer prettier (Let git colour it or have syntax highlighting)
 
+Implement exclude patterns
 Implement scp://*
 
 Write a vim help file
@@ -98,6 +92,8 @@ Cleanup this Readme
 Deal with project-todo and project-fixme
 
 Post to vim./mailing list
+Maybe package for debian
+	http://pkg-vim.alioth.debian.org/vim-policy.txt
 
 
 Long Term (maybe features)

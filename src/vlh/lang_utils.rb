@@ -41,3 +41,17 @@ class Regexp
 end
 
 
+class Hash
+
+	# Pulled from activesupport -- if I use any more of this, I should probably
+	# just package the gem into vlh/lib or somesuch
+	def assert_valid_keys(*valid_keys)
+		unknown_keys = keys - [valid_keys].flatten
+		raise(
+			ArgumentError, 
+			"Unknown key(s): #{unknown_keys.join(", ")}"
+		) unless unknown_keys.empty?
+	end
+end
+
+

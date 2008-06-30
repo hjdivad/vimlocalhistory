@@ -12,11 +12,17 @@ module VimLocalHistory end
 class VimLocalHistory::VimIntegration
 
 	def initialize
-		#g:vlh_exclude_file_pattern
-		#g:vlh_exclude_path_pattern
-		@repository = VimLocalHistory::Repository.new do
-			Vim::get_variable( 'g:vlh_repository_dir')
-		end
+		@repository = VimLocalHistory::Repository.new({
+			:location => lambda {
+				Vim::get_variable( 'g:vlh_repository_dir')
+			},
+			:exclude_files => lambda {
+				Vim::get_variable( 'g:vlh_exclude_file_pattern')
+			},
+			:exclude_paths => lambda {
+				Vim::get_variable( 'g:vlh_exclude_path_pattern')
+			}
+		})
 
 		setup_vim_event_hooks
 		setup_vim_commands

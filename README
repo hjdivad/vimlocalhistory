@@ -71,13 +71,13 @@ History
 Configuration
 -------------
 g:vlh_respository_dir
-g:vlh_exclude_pattern
+g:vlh_exclude_file_pattern
+g:vlh_exclude_path_pattern
 g:vlh_log_command
 
 
 TODO
 =====
-Implement exclude patterns
 hand it off to earl
 
 FIX ruby-debug

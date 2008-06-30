@@ -69,7 +69,10 @@ EOS
 
 task :test do
 	FileUtils.mkdir_p 'test/repo'
-	system 'vim +"let g:vlh_repository_dir=\'test/repo\'" +"so vimlocalhistory-test.vim"'
+	system 'vim -u NONE +"let g:vlh_repository_dir=\'test/repo\'" ' +
+			'+"let g:vlh_exclude_file_pattern=\'.*\.ignore\'" ' +
+			'+"let g:vlh_exclude_path_pattern=\'\/ignore\/\'" ' +
+			'+"so vimlocalhistory-test.vim"'
 end
 Spec::Rake::SpecTask.new do |t|
 	t.ruby_opts = ['-rconfig']

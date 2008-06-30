@@ -1,6 +1,6 @@
 function! Reload()
-	if exists("g:loaded_vlh")
-		unlet g:loaded_vlh
+	if exists("loaded_vlh")
+		unlet loaded_vlh
 		ruby << EOS
 			require 'config'
 			load 'src/vlh/vim_wrapper.rb'

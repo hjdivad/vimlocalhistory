@@ -1,4 +1,4 @@
-if exists('loaded_vlh') || &cp
+if exists('loaded_vlh')
   finish
 endif
 let loaded_vlh=1

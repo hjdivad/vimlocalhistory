@@ -1,5 +1,6 @@
 
 require 'fileutils'
+require 'tempfile'
 
 require 'spec/spec_helper'
 
@@ -78,6 +79,16 @@ describe VimLocalHistory::Repository do
 
 
 	shared_examples_for "with a valid g:vlh_repository_dir" do
+		before(:each) do
+			@temp = Tempfile.new('vlh-spec').path
+			FileUtils.cp './spec/assets/sample_file.txt', @temp
+		end
+
+		after(:each) do
+			FileUtils.cp @temp, './spec/assets/sample_file.txt'
+		end
+
+
 		it "should be enabled" do
 			@repo.should be_enabled
 		end
@@ -238,11 +249,83 @@ describe VimLocalHistory::Repository do
 			end
 		end
 
-
-		#TODO: user-supplied exclusion patterns (file & path)
-
 		########################################################################
 	end
+
+	########################################################################
+	# Exclusion patterns
+	shared_examples_for "a repository initialized with exclusion patterns" do
+		describe "(when given a user-specified file exclusion pattern)" do
+			before(:each) do
+				@repo = VimLocalHistory::Repository.new({
+					:location => './test/with-repo',
+					:exclude_files => '.*\.ignore'
+				})
+				@starting_rev = git_rev_head( @repo.location)
+			end
+
+
+			it "should complain if the pattern is not a valid ruby regex string" do
+				lambda {
+					repo = VimLocalHistory::Repository.new({
+						:location => './test/with-repo',
+						:exclude_files => '(foo'
+					})
+
+					repo.commit_file 'spec/assets/sample_file.txt'
+				}.should raise_error( RegexpError)
+			end
+
+			it "should not commit paths whose file part match the pattern" do
+				@repo.commit_file 'spec/assets/sample_file.ignore'
+				git_rev_head( @repo.location).should == @starting_rev
+			end
+
+			it "should commit paths that match the pattern, as long as their
+			file part does not".compact! do
+				path = 'spec/assets/dont.ignore/sample_file.txt'
+				regexp = Regexp.new('.*\.ignore')
+				path.should =~ regexp
+
+				@repo.commit_file  path
+				git_revs( 
+					@repo.location, path
+				).should have_exactly(1).commits
+			end
+		end
+
+
+		describe "(when given a user-specified path exclusion pattern)" do
+			before(:each) do
+				@repo = VimLocalHistory::Repository.new({
+					:location => './test/with-repo',
+					:exclude_paths => '.ignore\/'
+				})
+				@starting_rev = git_rev_head( @repo.location)
+			end
+
+
+			it "should complain if the pattern is not a valid ruby regex
+			string".compact! do
+				lambda {
+					repo = VimLocalHistory::Repository.new({
+						:location => './test/with-repo',
+						:exclude_paths => '(foo'
+					})
+
+					repo.commit_file 'spec/assets/sample_file.txt'
+				}.should raise_error( RegexpError)
+			end
+
+			it "should not commit paths that match the pattern" do
+				@repo.commit_file 'spec/asset/ignore/sample_file.txt'
+				git_rev_head( @repo.location).should == @starting_rev
+			end
+		end
+	end
+	########################################################################
+
+
 
 	describe "
 		(with g:vlh_repository_dir set to a path with no initialized git
@@ -289,6 +372,82 @@ describe VimLocalHistory::Repository do
 			rescue => error
 				git_rev_head( @repo.location).should == starting_rev	
 			end
+		end
+	end
+
+
+	describe "
+		(with path and file exclusion patterns)
+	".compact! do
+
+		it_should_behave_like "a repository initialized with exclusion patterns"
+
+
+		it "should accept a constructor with only a path-exclusion pattern
+		(string)".compact! do
+			lambda {
+				VimLocalHistory::Repository.new({
+					:location => './test/with-repo',
+					:exclude_paths => 'foo'
+				})
+			}.should_not raise_error
+		end
+
+		it "should accept a constructor with only a file-exclusion pattern
+		(string and Regexp)".compact! do
+			lambda {
+				VimLocalHistory::Repository.new({
+					:location => './test/with-repo',
+					:exclude_files => 'foo'
+				})
+			}.should_not raise_error
+		end
+
+		it "should accept procs for path exclusion patterns" do
+			lambda {
+				VimLocalHistory::Repository.new({
+					:exclude_files => lambda { 'hi' }
+				})
+			}.should_not raise_error
+		end
+	end
+
+	describe "(with path and file exclusion patterns)" do
+		before(:each) do
+			File.should be_exist('./test/without-repo')
+			File.should_not be_exist('./test/without-repo/.git')
+			@repo = VimLocalHistory::Repository.new({
+				:location => './test/without-repo',
+				:exclude_files => 'ignoreme',
+				:exclude_paths => '\/ignoreme\/',
+			})
+		end
+
+		it_should_behave_like "with a valid g:vlh_repository_dir"
+	end
+
+
+	describe "(options hash)" do
+		it "should accept keys :location, :exclude_paths, :exclude_files" do
+			lambda {
+				VimLocalHistory::Repository.new({
+					:location => 'foo',
+					:exclude_paths => 'foo',
+					:exclude_files => 'foo',
+				})
+			}.should_not raise_error
+		end
+
+		it "should not accept illegal keys (e.g., :test, :foo)" do
+			lambda {
+				VimLocalHistory::Repository.new({
+					:location => 'foo',
+					:exclude_paths => 'foo',
+
+					:foo => 'foo',
+					:test => 'foo'
+				})
+			}.should raise_error(ArgumentError)
 		end
 	end
 end

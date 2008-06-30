@@ -7,15 +7,64 @@ module VimLocalHistory end
 class VimLocalHistory::Repository
 
 
-	def initialize( location=nil, &block)
-		if block_given? and not location
-			@location_proc = Proc.new &block
-		else
+	def initialize( options={})
+		options = { :location => options} if options.is_a? String
+		options.assert_valid_keys :location, :exclude_paths, :exclude_files
+
+
+		initialize_location options[ :location]
+		initialize_exclusion_patterns(
+			options[ :exclude_paths], 
+			options[ :exclude_files]
+		)
+	end
+
+	def initialize_location( location=nil)
+		if location.is_a? String
 			path = File.expand_path( location) if 
 				location and location.strip.size > 0
-			@location_proc = Proc.new { path }
+			location = Proc.new { path }
 		end
+		@location_proc = location
 	end
+
+	def initialize_exclusion_patterns( exclude_paths, exclude_files)
+		exclude_paths_proc = 
+			case exclude_paths
+			when String
+				Proc.new { exclude_paths }
+			when Proc
+				exclude_paths
+			else
+				raise ArgumentError.new(
+					"exclude_paths must be a String or Proc, not a
+					#{exclude_paths.class.name}".compact!
+				)
+			end if exclude_paths
+
+		exclude_files_proc =
+			case exclude_files
+			when String
+				Proc.new { exclude_files }
+			when Proc
+				exclude_files
+			else
+				raise ArgumentError.new(
+					"exclude_files must be a String or Proc, not a
+					#{exclude_files.class.name}".compact!
+				)
+			end if exclude_files
+
+		@user_exclude_paths_proc = Proc.new {
+			string = exclude_paths_proc.call if exclude_paths_proc
+			Regexp.new( string) if string
+		}
+		@user_exclude_files_proc = Proc.new {
+			string = exclude_files_proc.call if exclude_files_proc
+			Regexp.new( string) if string
+		}
+	end
+
 
 	def enabled?
 		check_enabled
@@ -74,14 +123,21 @@ class VimLocalHistory::Repository
 
 
 	def path_excluded?( path)
-		@@exclusion_pattern ||= (
+		@@implicit_exclusion_pattern ||= (
 			/^.git$/ |
 			/^.git\// |
 
 			/\/.git$/ |
 			/\/.git\//
 		)
-		path =~ @@exclusion_pattern
+		user_exclude_paths = @user_exclude_paths_proc.call
+		user_exclude_files = @user_exclude_files_proc.call
+		
+		file = path.chomps("#{File.dirname(path)}/")
+
+		path =~ @@implicit_exclusion_pattern or
+			(user_exclude_paths and path =~ user_exclude_paths) or
+			(user_exclude_files and file =~ user_exclude_files)
 	end
 
 

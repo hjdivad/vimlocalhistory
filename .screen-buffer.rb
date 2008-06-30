@@ -1,4 +1,11 @@
 require 'irb_util'
 
+rr = (
+    /^.git$/ |
+    /^.git\// |
 
-h = Hash.new{|h,k| h[k] = Hash.new{|hh,kk| hh[kk] = []}}
+    /\/.git$/ |
+    /\/.git\//
+)
+
+".gitfoo/blah" =~ rr

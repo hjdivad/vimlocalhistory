@@ -1,4 +1,5 @@
-#!/usr/bin/ruby
+require 'errors'
+
 
 class String
 
@@ -21,6 +22,21 @@ class String
 		self.gsub! /^\s+/, ' '
 		self.gsub! /\n/, ''
 		self
+	end
+end
+
+
+class Regexp
+	def |( other_regex)
+		raise UnmatchedOptionsError.new("
+			/#{self.source}/ had options #{self.options}, but
+			/#{other_regex.source}/ had options #{other_regex.options}
+		".compact!) unless self.options == other_regex.options
+
+		Regexp.new(
+			"(?:#{self.source})|(?:#{other_regex.source})",
+			self.options
+		)
 	end
 end
 

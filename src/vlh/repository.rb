@@ -10,13 +10,10 @@ class VimLocalHistory::Repository
 	def initialize( location=nil, &block)
 		if block_given? and not location
 			@location_proc = Proc.new &block
-		elsif location
-			@location_proc = Proc.new { location }
 		else
-			raise ArgumentError.new(
-				"Either a location must be specified, or a block that returns
-				the location must be given".compact!
-			)
+			path = File.expand_path( location) if 
+				location and location.strip.size > 0
+			@location_proc = Proc.new { path }
 		end
 	end
 
@@ -26,6 +23,8 @@ class VimLocalHistory::Repository
 
 
 	def commit_file( path)
+		return if path_excluded? path
+
 		ensure_repository_initialized
 		copy_file_to_repository( path)
 		git_add_and_commit_all
@@ -52,7 +51,8 @@ class VimLocalHistory::Repository
 
 	def check_enabled
 		location do |loc|
-			File.exists?( loc) and
+			loc and
+				File.exists?( loc) and
 				File.new( loc).stat.writable?
 		end
 	end
@@ -71,6 +71,19 @@ class VimLocalHistory::Repository
 			"Initial commit from VimLocalHistory"
 		)
 	end
+
+
+	def path_excluded?( path)
+		@@exclusion_pattern ||= (
+			/^.git$/ |
+			/^.git\// |
+
+			/\/.git$/ |
+			/\/.git\//
+		)
+		path =~ @@exclusion_pattern
+	end
+
 
 	def copy_file_to_repository( path)
 		if path.starts_with? 'scp://'

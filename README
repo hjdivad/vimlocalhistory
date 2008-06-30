@@ -77,13 +77,27 @@ g:vlh_log_command
 
 TODO
 =====
+Implement exclude patterns
 hand it off to earl
+
+FIX ruby-debug
+	rdebug FOO which cd's blah
+	with autolist turned on
+
+	INTERNAL ERROR!!! undefined method `size' for nil:NilClass
+			/var/lib/gems/1.8/gems/ruby-debug-0.10.1/cli/ruby-debug/commands/list.rb:75:in `display_list'
+			/var/lib/gems/1.8/gems/ruby-debug-0.10.1/cli/ruby-debug/commands/list.rb:47:in `execute'
+			/var/lib/gems/1.8/gems/ruby-debug-0.10.1/cli/ruby-debug/processor.rb:218:in `always_run'
+			/var/lib/gems/1.8/gems/ruby-debug-0.10.1/cli/ruby-debug/processor.rb:216:in `each'
+			/var/lib/gems/1.8/gems/ruby-debug-0.10.1/cli/ruby-debug/processor.rb:216:in `always_run'
+			/var/lib/gems/1.8/gems/ruby-debug-0.10.1/cli/ruby-debug/processor.rb:224:in `process_commands'
+			/var/lib/gems/1.8/gems/ruby-debug-0.10.1/cli/ruby-debug/processor.rb:171:in `__at_line'
+
 
 Implement File history buffer
 Finish file history buffer (diff item / open item / restore item)
 Make the history buffer prettier (Let git colour it or have syntax highlighting)
 
-Implement exclude patterns
 Implement scp://*
 
 Write a vim help file

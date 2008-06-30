@@ -36,3 +36,22 @@ describe String do
 		end
 	end
 end
+
+
+describe Regexp do
+	describe "|" do
+		it "should join /foo/ and /bar/ into /(?:foo)|(?:bar)" do
+			(/foo/ | /bar/).should == /(?:foo)|(?:bar)/
+		end
+
+		it "should preserve options (such as /i and /m)" do
+			(/foo/i | /bar/i).options.should == (//i).options
+		end
+
+		it "should throw an error if options don't match" do
+			lambda {
+				/foo/ | /bar/i
+			}.should raise_error(UnmatchedOptionsError)
+		end
+	end
+end

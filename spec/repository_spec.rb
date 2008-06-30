@@ -23,6 +23,27 @@ describe VimLocalHistory::Repository do
 	end
 
 
+	describe "(with g:vlh_repository_dir set to a relative path)" do
+		before(:each) do
+			@repo = VimLocalHistory::Repository.new 'test/with-repo'
+		end
+
+
+		it "should not consider the repository location changed after the pwd
+		changes".compact! do
+			pwd = FileUtils.pwd
+			begin
+				FileUtils.cd 'test'
+				File.expand_path( @repo.location).should ==
+					File.expand_path( './with-repo')
+			ensure
+				# revert back to previous path
+				FileUtils.cd pwd
+			end
+		end
+	end
+
+
 	describe "(with g:vlh_repository_dir unset)" do
 		before(:each) do
 			@repo = VimLocalHistory::Repository.new ''
@@ -135,6 +156,92 @@ describe VimLocalHistory::Repository do
 				@repo.commit_file path
 			}.should raise_error( UnimplementedFeatureError)
 		end
+
+
+		########################################################################
+		# Exclusion patterns
+		describe "(in handling paths matching .git)" do
+			before(:each) do
+				# ensure the repository is actually initialized by comitting a dummy
+				# file
+				@repo.commit_file 'spec/assets/sample_file.txt'
+				@starting_rev = git_rev_head( @repo.location)
+				@starting_pwd = FileUtils.pwd
+
+
+				FileUtils.mkdir_p 'spec/assets/.git'
+				FileUtils.cp 'spec/assets/sample_file.txt', 'spec/assets/.git/'
+			end
+
+			after(:each) do
+				FileUtils.cd @starting_pwd
+				FileUtils.rm_r 'spec/assets/.git', :force => true
+			end
+
+
+			describe "(paths that should be silently ignored)" do
+				before(:each) do
+					class << @repo
+						def git_add_and_commit_all
+							raise "git commit should not have been called for a path
+							matching .git".compact!
+						end
+					end
+				end
+
+				it "should silently exclude paths that match ^.git/  (i.e., nothing
+				should happen after being asked to commit such a path)".compact! do
+
+					FileUtils.cd 'spec/assets'
+
+					@repo.commit_file '.git/sample_file.txt'
+
+					git_rev_head( @repo.location).should == @starting_rev
+				end
+
+				it "should silently exclude paths that match /.git/  (i.e., nothing
+				should happen after being asked to commit such a path)".compact! do
+
+					@repo.commit_file 'spec/assets/.git/sample_file.txt'
+					git_rev_head( @repo.location).should == @starting_rev
+				end
+			end
+
+
+			it "should not silently ignore /foo.git/some_file" do
+				@repo.commit_file 'spec/assets/foo.git/sample_file.txt'
+
+				git_revs( 
+					@repo.location, 
+					'./spec/assets/foo.git/sample_file.txt'
+				).should have_exactly(1).commits
+			end
+			
+			it "should not silently ignore /.gitfoo/some_file" do
+				@repo.commit_file 'spec/assets/.gitfoo/sample_file.txt'
+
+				git_revs( 
+					@repo.location, 
+					'./spec/assets/.gitfoo/sample_file.txt'
+				).should have_exactly(1).commits
+			end
+
+			it "should not silently ignore ^.gitfoo/some_file" do
+				FileUtils.cd 'spec/assets'
+
+				@repo.commit_file '.gitfoo/sample_file.txt'
+
+				git_revs( 
+					@repo.location, 
+					'.gitfoo/sample_file.txt'
+				).should have_exactly(1).commits
+			end
+		end
+
+
+		#TODO: user-supplied exclusion patterns (file & path)
+
+		########################################################################
 	end
 
 	describe "

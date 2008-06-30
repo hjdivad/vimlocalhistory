@@ -9,5 +9,9 @@ class UnimplementedFeatureError < StandardError; end
 
 # This method requires a block to be passed in, from which a Proc will be
 # constructed (i.e., yield is not called immediately, hence there is no
-# LocalJumpError)
+# LocalJumpError).
 class BlockRequiredError < StandardError; end
+
+# Indicates that an operation expected all operands to share the same options,
+# but they did not.
+class UnmatchedOptionsError < StandardError; end

@@ -12,6 +12,8 @@ module VimLocalHistory end
 class VimLocalHistory::VimIntegration
 
 	def initialize
+		#g:vlh_exclude_file_pattern
+		#g:vlh_exclude_path_pattern
 		@repository = VimLocalHistory::Repository.new do
 			Vim::get_variable( 'g:vlh_repository_dir')
 		end

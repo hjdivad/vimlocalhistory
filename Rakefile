@@ -37,6 +37,12 @@ task :uninstall do
 end
 
 desc <<-EOS
+	Reinstalls the plugin (equivalent to running rake uninstall install)
+EOS
+task :reinstall => [:uninstall, :install]
+
+
+desc <<-EOS
 	Creates a tarball for distribution via, e.g. vim.org scripts
 EOS
 task :tarball do

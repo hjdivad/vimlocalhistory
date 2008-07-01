@@ -1,4 +1,4 @@
-require 'lang_utils'
+require 'vlh/lang_utils'
 
 describe String do
 	describe "#compact!" do

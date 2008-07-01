@@ -4,9 +4,9 @@ require 'tempfile'
 
 require 'spec/spec_helper'
 
-require 'repository'
-require 'lang_utils'
-require 'errors'
+require 'vlh/repository'
+require 'vlh/lang_utils'
+require 'vlh/errors'
 
 
 describe VimLocalHistory::Repository do
@@ -410,6 +410,28 @@ describe VimLocalHistory::Repository do
 				})
 			}.should_not raise_error
 		end
+
+		it "should ignore empty path exclusion patterns" do
+			repo = VimLocalHistory::Repository.new({
+				:location => './test/with-repo',
+				:exclude_paths => ''
+			})
+
+			starting_rev = git_rev_head( repo.location)
+			repo.commit_file 'spec/assets/sample_file.txt'
+			git_rev_head( repo.location).should_not == starting_rev
+		end
+
+		it "should ignore empty file exclusion patterns" do
+			repo = VimLocalHistory::Repository.new({
+				:location => './test/with-repo',
+				:exclude_files => ''
+			})
+
+			starting_rev = git_rev_head( repo.location)
+			repo.commit_file 'spec/assets/sample_file.txt'
+			git_rev_head( repo.location).should_not == starting_rev
+		end
 	end
 
 	describe "(with path and file exclusion patterns)" do
@@ -427,13 +449,52 @@ describe VimLocalHistory::Repository do
 	end
 
 
+	describe "(logging)" do
+		it "should create the directory path if it does not already exist" do
+			FileUtils.rm_r './test/log', :force => true if
+				File.exists? './test/log'
+			VimLocalHistory::Repository.new({
+				:location => './test/with-repo',
+				:log => './test/log',
+			})
+			
+			File.should be_exist './test/log/vlh.log'
+		end
+	end
+	describe "(when passed a log option)" do
+		before(:each) do
+			FileUtils.rm './test/log/vlh.log', :force => true
+			@repo = VimLocalHistory::Repository.new({
+				:location => './test/with-repo',
+				:exclude_files => '\.*\.ignore$',
+				:log => './test/log',
+			})
+		end
+
+		it "should log calls to commit" do
+			@repo.commit_file 'spec/assets/sample_file.txt'
+			File.read('./test/log/vlh.log').should =~
+				/Asked to commit spec\/assets\/sample_file.txt/i
+		end
+
+		it "should log when paths are excluded by patterns" do
+			@repo.commit_file 'spec/assets/sample_file.ignore'
+			File.read('./test/log/vlh.log').should =~
+				/Excluded path spec\/assets\/sample_file\.ignore/i
+		end
+	end
+
+
 	describe "(options hash)" do
-		it "should accept keys :location, :exclude_paths, :exclude_files" do
+		it "should accept keys :location, :exclude_paths, :exclude_files and
+		:log".compact! do
 			lambda {
 				VimLocalHistory::Repository.new({
 					:location => 'foo',
 					:exclude_paths => 'foo',
 					:exclude_files => 'foo',
+
+					:log => 'test/log',
 				})
 			}.should_not raise_error
 		end

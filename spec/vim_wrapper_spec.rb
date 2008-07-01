@@ -1,6 +1,6 @@
 require 'spec/spec_helper'
 
-require 'lang_utils'
+require 'vlh/lang_utils'
 
 
 describe 'Vim Wrapper' do
@@ -8,7 +8,7 @@ describe 'Vim Wrapper' do
 
 	before(:all) do
 		Vim = mock("VIM")
-		load 'vim_wrapper.rb'
+		load 'vlh/vim_wrapper.rb'
 		class << Vim
 			alias_method :real_callbacks, :callbacks
 			def callbacks

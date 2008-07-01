@@ -1,7 +1,8 @@
 require 'fileutils'
+require 'logger'
 
-require 'lang_utils'
-require 'errors'
+require 'vlh/lang_utils'
+require 'vlh/errors'
 
 module VimLocalHistory end
 class VimLocalHistory::Repository
@@ -9,9 +10,12 @@ class VimLocalHistory::Repository
 
 	def initialize( options={})
 		options = { :location => options} if options.is_a? String
-		options.assert_valid_keys :location, :exclude_paths, :exclude_files
+		options.assert_valid_keys(
+			:location, :exclude_paths, :exclude_files, :log
+		)
 
 
+		initialize_log options[ :log]
 		initialize_location options[ :location]
 		initialize_exclusion_patterns(
 			options[ :exclude_paths], 
@@ -57,12 +61,23 @@ class VimLocalHistory::Repository
 
 		@user_exclude_paths_proc = Proc.new {
 			string = exclude_paths_proc.call if exclude_paths_proc
-			Regexp.new( string) if string
+			Regexp.new( string) if string and not string.empty?
 		}
 		@user_exclude_files_proc = Proc.new {
 			string = exclude_files_proc.call if exclude_files_proc
-			Regexp.new( string) if string
+			Regexp.new( string) if string and not string.empty?
 		}
+	end
+
+	def initialize_log( path)
+		if path
+			FileUtils.mkdir_p path
+			@log = Logger.new( "#{path}/vlh.log", 10, 1.megabyte)
+		else
+			class << (@log = Object.new)
+				def debug(*args); end
+			end
+		end
 	end
 
 
@@ -72,7 +87,11 @@ class VimLocalHistory::Repository
 
 
 	def commit_file( path)
-		return if path_excluded? path
+		@log.debug "Asked to commit #{path}"
+		if path_excluded? path
+			@log.debug "Excluded path #{path}"
+			return
+		end
 
 		ensure_repository_initialized
 		copy_file_to_repository( path)

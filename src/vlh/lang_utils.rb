@@ -1,4 +1,4 @@
-require 'errors'
+require 'vlh/errors'
 
 
 class String
@@ -40,11 +40,24 @@ class Regexp
 	end
 end
 
+########################################################################
+# Pulled from activesupport -- if I use any more of this, I should probably
+# just package the gem into vlh/lib or somesuch
+
+class Fixnum
+	def kilobytes
+	  self * 1024
+	end
+	alias :kilobyte :kilobytes
+
+	def megabytes
+	  self * 1024.kilobytes
+	end
+	alias :megabyte :megabytes
+end
 
 class Hash
 
-	# Pulled from activesupport -- if I use any more of this, I should probably
-	# just package the gem into vlh/lib or somesuch
 	def assert_valid_keys(*valid_keys)
 		unknown_keys = keys - [valid_keys].flatten
 		raise(
@@ -54,4 +67,5 @@ class Hash
 	end
 end
 
+########################################################################
 

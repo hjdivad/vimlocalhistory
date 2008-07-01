@@ -4,6 +4,8 @@ endif
 let loaded_vlh=1
 
 ruby << EOF
-	load 'src/vlh/vlh.rb' if File.exists? 'src/vlh/vlh.rb'
-	load 'vlh/vlh.rb' if File.exists? 'vlh/vlh.rb'
+	file_dir = Vim::evaluate('expand("<sfile>:h")')
+	$: << file_dir unless $:.include? file_dir
+
+	load 'vlh/vlh.rb'
 EOF

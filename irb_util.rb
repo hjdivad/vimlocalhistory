@@ -1,6 +1,6 @@
 #!/usr/bin/ruby
 
-require 'config'
+$: << 'src' unless $:.include? 'src'
 require 'lang_utils'
 require 'repository'
 

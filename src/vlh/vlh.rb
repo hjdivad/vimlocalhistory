@@ -2,8 +2,8 @@ pdir = File.dirname(__FILE__)
 $: << pdir unless $:.include? pdir
 $: << "#{pdir}/vlh" unless $:.include? "#{pdir}/vlh"
 
-require 'vim_wrapper'
-require 'repository'
+require 'vlh/vim_wrapper'
+require 'vlh/repository'
 
 
 
@@ -21,7 +21,8 @@ class VimLocalHistory::VimIntegration
 			},
 			:exclude_paths => lambda {
 				Vim::get_variable( 'g:vlh_exclude_path_pattern')
-			}
+			},
+			:log => Vim::get_variable( 'g:vlh_log_dir')
 		})
 
 		setup_vim_event_hooks

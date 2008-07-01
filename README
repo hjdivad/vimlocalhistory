@@ -1,61 +1,8 @@
+About
+------
 Automatically saves files on write using git.  This provides a convenient,
 automatic backup system of, e.g. files in /etc that are modified, as well as a
 poor man's "local history" (a lá the eclipse feature with the same name).
-
-
-Behaviours
-==========
-
-Vim Local History (VLH)
-	Should be enabled if the property g:vlh_repository_dir is set
-
-
-	When writing a buffer, should give a warning if VLH is enabled, but
-	g:vlh_repository_dir specifies a path that does not exist, or to which the
-	user doesn't have write permissions
-
-	When writing a buffer, should initialize the git repository if VLH is
-	enabled and no git repository exists at g:vlh_repository_dir and the path
-	specified by g:vlh_repository_dir exists
-
-	When writing a buffer, should commit the current buffer to the git
-	repository if VLH is enabled and a git repository is initialized at
-	g:vlh_repository_dir
-
-
-	When committing a buffer for a local file (i.e., not an scp'd or ftp'd
-	file), should do so at a pseudo-absolute path, rooted at
-	g:vlh_repository_dir/localhost
-
-	When committing a buffer for a local symlink, should strip '.' and '..' from
-	the path, but should not resolve the link (so that /foo/bar and /foo/baz are
-	saved separately, even if one is a symlink to the other).
-
-
-	When committing a non-local buffer (e.g., an ftp'd or scp'd file), give a
-	warning that this is not supported.
-
-
-Command History
-	
-	Should give a warning if VLH is not enabled
-
-	Should use the file history buffer if it exists
-
-	Should use the window with the file history buffer if it exists
-
-	Should create a new buffer for file history if no such buffer exists
-
-	Should create a new window for file history if no such window exists.  This
-	window should have the file history buffer open
-
-	Should update the file history buffer with the output of the default log
-	command
-
-
-File History Buffer
-
-	Should be read only
 
 
 Commands
@@ -73,26 +20,21 @@ Configuration
 g:vlh_respository_dir
 g:vlh_exclude_file_pattern
 g:vlh_exclude_path_pattern
-g:vlh_log_command
+
+These can't be changed dynamically
+----------------------------------
+g:vlh_log_dir
 
 
 TODO
 =====
-hand it off to earl
+Fix vimlocalhistory.vim
+	it tests for files relative Dir.pwd, but really it should try to find itself
+	in the runtimepath and load files relative to that
 
-FIX ruby-debug
-	rdebug FOO which cd's blah
-	with autolist turned on
-
-	INTERNAL ERROR!!! undefined method `size' for nil:NilClass
-			/var/lib/gems/1.8/gems/ruby-debug-0.10.1/cli/ruby-debug/commands/list.rb:75:in `display_list'
-			/var/lib/gems/1.8/gems/ruby-debug-0.10.1/cli/ruby-debug/commands/list.rb:47:in `execute'
-			/var/lib/gems/1.8/gems/ruby-debug-0.10.1/cli/ruby-debug/processor.rb:218:in `always_run'
-			/var/lib/gems/1.8/gems/ruby-debug-0.10.1/cli/ruby-debug/processor.rb:216:in `each'
-			/var/lib/gems/1.8/gems/ruby-debug-0.10.1/cli/ruby-debug/processor.rb:216:in `always_run'
-			/var/lib/gems/1.8/gems/ruby-debug-0.10.1/cli/ruby-debug/processor.rb:224:in `process_commands'
-			/var/lib/gems/1.8/gems/ruby-debug-0.10.1/cli/ruby-debug/processor.rb:171:in `__at_line'
-
+	$: should now include the directory containing vimlocalhistory.vim
+	It seems to be loading VimLocalHistory, but not saving on writes -- must
+	investigate
 
 Implement File history buffer
 Finish file history buffer (diff item / open item / restore item)

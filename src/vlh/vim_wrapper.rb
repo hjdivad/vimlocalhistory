@@ -1,4 +1,4 @@
-require 'lang_utils'
+require 'vlh/lang_utils'
 
 class << Vim
 

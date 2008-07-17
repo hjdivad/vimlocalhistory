@@ -247,6 +247,21 @@ describe VimLocalHistory::Repository do
 					'.gitfoo/sample_file.txt'
 				).should have_exactly(1).commits
 			end
+
+			it "should not silently ignore /foo/bar even if there's a saved
+			/foo/.gitignore with a pattern that matches bar".compact! do
+				FileUtils.cp 'spec/assets/sample_file.txt', 'spec/assets/foo'
+
+				@repo.commit_file 'spec/assets/foo/.gitignore'
+				@repo.commit_file 'spec/assets/foo/sample_file.txt'
+
+				git_revs( 
+					@repo.location, 
+					'spec/assets/foo/sample_file.txt'
+				).should have_exactly(1).commits
+
+				FileUtils.rm 'spec/assets/foo/sample_file.txt'
+			end
 		end
 
 		########################################################################
@@ -458,7 +473,7 @@ describe VimLocalHistory::Repository do
 				:log => './test/log',
 			})
 			
-			File.should be_exist './test/log/vlh.log'
+			File.should be_exist( './test/log/vlh.log')
 		end
 	end
 	describe "(when passed a log option)" do

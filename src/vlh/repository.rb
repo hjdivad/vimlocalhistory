@@ -186,7 +186,7 @@ class VimLocalHistory::Repository
 		#FIXME: quotesafe message
 		#FIXME: error if msg nil or empty
 		system "cd #{location} && 
-				git add * &&  
+				git add -f * &&  
 				git commit --all -m \"#{msg}\" \
 					> /dev/null"
 	end

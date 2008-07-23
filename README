@@ -1,12 +1,25 @@
-About
-------
+			Plugin for (TODO: synopsis)
+
+													*vlh* *vimlocalhistory*
+		Contents:
+			Commands.................................|vlh-commands|
+			Configuration............................|vlh-configuration|
+			TODO.....................................|vlh-todo|
+			Alternatives.............................|vlh-alternatives|
+
+
+TODO: description
 Automatically saves files on write using git.  This provides a convenient,
 automatic backup system of, e.g. files in /etc that are modified, as well as a
 poor man's "local history" (a lá the eclipse feature with the same name).
 
 
-Commands
---------
+==============================================================================
+COMMANDS												*vlh-commands*	{{{1
+
+VLHDiff
+VLHOpen
+VLHRestore
 
 History
 	diff a specific item
@@ -15,30 +28,47 @@ History
 		i.e., open to the current buffer and write
 
 
-Configuration
--------------
+}}}
+==============================================================================
+CONFIGURATION 										*vlh-configuration*	{{{
+
 g:vlh_respository_dir
 g:vlh_exclude_file_pattern
 g:vlh_exclude_path_pattern
 
+------------------------------------------------------------------------
 These can't be changed dynamically
-----------------------------------
 g:vlh_log_dir
 
 
-TODO
-=====
-Fix vimlocalhistory.vim
-	it tests for files relative Dir.pwd, but really it should try to find itself
-	in the runtimepath and load files relative to that
+}}}
+==============================================================================
+TODO														*vlh-todo*	{{{1
 
-	$: should now include the directory containing vimlocalhistory.vim
-	It seems to be loading VimLocalHistory, but not saving on writes -- must
-	investigate
+Comment stuff
+	vlh
+	vim_wrapper
+	repository
+	lang_utils
 
-Implement File history buffer
-Finish file history buffer (diff item / open item / restore item)
-Make the history buffer prettier (Let git colour it or have syntax highlighting)
+Test sudo vim /blah
+	I think it will still write to ~/.vim/localhistory but with root
+	permissions, causing problems later (perhaps on git gc)
+
+File history buffer
+	view (git lg ...)
+	open
+	diff
+	restore
+	edit msg
+
+	make readonly
+
+	Highlight (either with git's colouring or with syntax highlighting)
+
+	In addition to syntax highlighting (commits, authors, etc.) also highlight
+	the selected item (several lines), to make clear the target of commands
+	(open/diff/restore/edit msg)
 
 Implement scp://*
 
@@ -52,31 +82,37 @@ Maybe package for debian
 	http://pkg-vim.alioth.debian.org/vim-policy.txt
 
 
+------------------------------------------------------------------------
 Long Term (maybe features)
---------------------------
+
 edit history message feature
 cleanup disk space feature
 delete commit feature
+unify local history and repository history
+	(e.g. support diffs of some local history revision against a repo. version)
 
 
-Reference
-===========
-
-
-
-Alternatives
-============
+}}}
+==============================================================================
+ALTERNATIVES										*vlh-alternatives*	{{{1
 
 rcsvers.vim
------------
 http://vim.sourceforge.net/scripts/script.php?script_id=563
 
 Saves backups in RCS whenever a file is saved.  Inspired by savevers.vim.
 
 
+------------------------------------------------------------------------
 savevers.vim
-------------
 http://vim.sourceforge.net/scripts/script.php?script_id=89
 
 Automatically saves and compares multiple, sequentially numbered old revisions
 of files.
+
+
+}}}
+
+
+
+
+vim:ft=help ts=4 sw=4 noexpandtab tw=78 foldmethod=marker

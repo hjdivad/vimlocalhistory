@@ -1,5 +1,6 @@
 require 'fileutils'
 require 'logger'
+require 'tempfile'
 
 require 'vlh/lang_utils'
 require 'vlh/errors'
@@ -98,6 +99,65 @@ class VimLocalHistory::Repository
 		git_add_and_commit_all
 	end
 
+	def revision_information( path, options=[])
+		return [] unless path
+
+		path = repo_relative_path( path)
+		format = options.map{|o| "%#{o}"}.join('%n')
+		output = `cd #{location} &&
+			git rev-list -n 10 --pretty=format:"#{format}" HEAD #{path}`
+
+		rv = []
+		output.split("\n").each_n( options.size + 1) do |commit, *lines|
+			rv << entry = {}
+			# this line looks like
+			# 	commit	abcd1234efgh5678
+			entry[:commit] = commit.chomps('commit').strip
+			lines.each_with_index do |line, idx|
+				entry[ options[ idx]] = line
+			end
+
+			entry.symbolize_keys!
+		end
+
+		rv
+	end
+
+	def checkout_file( path, revision)
+		with_path_and_revisions(path) do |path, revs|
+			return nil unless (0..(revs.size)).include? revision
+
+			temp_path = Tempfile.new('vlh-checkout').path
+			run [
+				cmd_cd,
+				cmd_git_show( revs[revision], path, temp_path)
+			]
+
+			temp_path
+		end
+	end
+
+	def revert_file( path, revision)
+		return false if 0 == revision or not path
+
+		with_path_and_revisions(path) do |repo_path, revs|
+			raise ArgumentError.new("
+				Unable to revert to revision #{revision} - only #{revs.size}
+				revisions are available.
+			".compact!) unless (1..(revs.size)).include? revision
+
+			run [
+				cmd_cd,
+				cmd_git_checkout( revs[revision], repo_path),
+				cmd_git_commit_all(
+					"Reverted to #{revision.position} prior commit")
+			]
+
+			FileUtils.cp "#{location}/#{repo_path}", path
+			true
+		end
+	end
+
 
 
 	def location
@@ -182,12 +242,53 @@ class VimLocalHistory::Repository
 	end
 
 
-	def git_add_and_commit_all( msg="Commit from VimLocalHistory")
+	def run( cmds)
+		cmdline = cmds.join(' && ')
+		succ = system( cmdline)
+
+		@log.debug("Error running commands:\n#{cmdline}") unless succ
+
+		succ
+	end
+
+	def cmd_cd
+		"cd #{location}"
+	end
+
+	def cmd_git_add_all
+		"git add -f *"
+	end
+
+	def cmd_git_show( commit, path, send_to=nil)
+		"git show #{commit}:#{path} #{"> #{send_to}" if send_to}"
+	end
+
+	def cmd_git_checkout( commit, path)
+		"git checkout #{commit} -- #{path}"
+	end
+
+	def cmd_git_commit_all( msg)
 		#FIXME: quotesafe message
 		#FIXME: error if msg nil or empty
-		system "cd #{location} && 
-				git add -f * &&  
-				git commit --all -m \"#{msg}\" \
-					> /dev/null"
+		"git commit --all -m \"#{msg}\" > /dev/null"
+	end
+
+	def git_add_and_commit_all( msg="Commit from VimLocalHistory")
+		run [ 
+			cmd_cd,
+			cmd_git_add_all,
+			cmd_git_commit_all( msg)
+		]
+	end
+
+
+	def repo_relative_path( path)
+		File.expand_path(path).chomps('/')
+	end
+
+	def with_path_and_revisions( path)
+		path = repo_relative_path( path)
+		revs = `cd #{location} && git rev-list HEAD #{path}`.split("\n")
+		yield path, revs
 	end
 end

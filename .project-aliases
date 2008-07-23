@@ -4,10 +4,12 @@ function grep_project {
 }
 
 
+alias gp='grep_project'
+
 #TODO: get path to work properly.  It seems to work initially, but when the file
 # type changes, path gets overwritten and src/** gets trashed
-alias project-gvim='gvim -p10 --cmd "set path+=src" --cmd "set path+=src/**" +"Project ./.vimproject" +"tabdo Project" +"tabdo foldopen!" +"winpos 0 0" +"set lines=61 columns=236" &'
-alias project-ctags='ctags -R src spec && ctags-gems'
+alias project-gvim='gvim -p10 +"so .gvim-init.vim" &'
+alias project-ctags='ctags -R src spec'
 alias project-irb='screen-ruby.rb .screen-buffer.rb'
 
 alias rake='rake'

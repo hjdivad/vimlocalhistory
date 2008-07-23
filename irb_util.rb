@@ -1,7 +1,7 @@
 #!/usr/bin/ruby
 
 $: << 'src' unless $:.include? 'src'
-require 'lang_utils'
-require 'repository'
+require 'vlh/lang_utils'
+require 'vlh/repository'
 
 

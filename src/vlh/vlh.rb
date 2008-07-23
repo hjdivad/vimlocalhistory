@@ -2,12 +2,12 @@ pdir = File.dirname(__FILE__)
 $: << pdir unless $:.include? pdir
 $: << "#{pdir}/vlh" unless $:.include? "#{pdir}/vlh"
 
+require 'time'
+
 require 'vlh/vim_wrapper'
 require 'vlh/repository'
 
 
-
-#TODO: expose command History -> VLH::show_history
 module VimLocalHistory end
 class VimLocalHistory::VimIntegration
 
@@ -27,6 +27,9 @@ class VimLocalHistory::VimIntegration
 
 		setup_vim_event_hooks
 		setup_vim_commands
+
+	rescue => error
+		report_error( error)
 	end
 
 	def setup_vim_event_hooks
@@ -50,7 +53,58 @@ class VimLocalHistory::VimIntegration
 	end
 
 	def setup_vim_commands
-		#TODO: impl
+		options = {
+			:arity => 1,
+			:completion => lambda {
+				@repository.revision_information(
+					Vim::Buffer.current.name,
+					%w(ad s)
+				).map_with_index! do |entry, idx|
+					# Create newline separated entries that look like
+					#  1 # previous		    7 Jan 2008 imagine a log entry here
+					#  ...
+					# 17 # 17 versions ago 14 Jul 2007 more log entries
+					"%2d # %-15.15s %11.11s %s" % [
+						idx+1, 
+						case idx
+							when 0
+								'previous'
+							else
+								"#{idx+1} versions ago"
+							end,
+						Time.parse( entry[:ad]).strftime( '%d %b %Y'),
+						entry[ :s],
+					]
+				end.join("\n")
+			},
+		}
+
+		Vim::create_command(:VLHDiff, options) do |arg|
+			revision = arg.to_i
+			path = @repository.checkout_file(Vim::Buffer.current.name, revision)
+			Vim::diffsplit( path, :vertical => true)
+			#TODO: these are probably not very generic -- i.e., they may not
+			# work well in cases where the current tab already has more than one
+			# window open
+			Vim::command("wincmd R")
+			Vim::command("wincmd h")
+		end
+
+		#FIXME: this leaks tempfiles
+		#	it would be good to clean them up either on bufclose
+		#	or on vim exit
+		Vim::create_command(:VLHOpen, options) do |arg|
+			revision = arg.to_i
+			path = @repository.checkout_file(Vim::Buffer.current.name, revision)
+			Vim::edit_file( path)
+		end
+
+		Vim::create_command(:VLHReplace, options) do |arg|
+			revision = arg.to_i
+			@repository.revert_file( Vim::Buffer.current.name, revision)
+			Vim::set_option( 'nomodified')
+			Vim::edit_file( Vim::Buffer.current.name)
+		end
 	end
 
 
@@ -61,6 +115,11 @@ class VimLocalHistory::VimIntegration
 
 	def unset_vim_event_hooks
 		Vim::clear_event_handlers_by_group( 'VimLocalHistory')
+	end
+
+	def report_error( e)
+		lines = ["#{e.class.name}: #{e.message}"] + e.backtrace
+		lines.each{|line| Vim::message( line) }
 	end
 
 end

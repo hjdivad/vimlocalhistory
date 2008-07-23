@@ -2,10 +2,8 @@ vlh="/home/davidjh/devel/vimlocalhist" CD="." filter="*" {
  INSTALL
  README
  Rakefile
- config.rb
  irb_util.rb
- vimlocalhistory-0.1.tar.gz
- vimlocalhistory-test.vim
+ tags
  src="src" filter="*" {
   vimlocalhistory.vim
   vlh="vlh" filter="*" {

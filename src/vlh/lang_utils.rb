@@ -2,7 +2,6 @@ require 'vlh/errors'
 
 
 class String
-
 	# Does the same as String#chomp, except removes characters from the start of
 	# the string, rather than the end, and the argument is required.
 	def chomps( separator)
@@ -54,16 +53,81 @@ class Fixnum
 	  self * 1024.kilobytes
 	end
 	alias :megabyte :megabytes
+	
+	def position
+		mod_100 = self.abs % 100
+		mod_10 = self.abs % 10
+
+		return "#{self}th" if (11..13).include? mod_100
+
+		case mod_10
+			when 1
+				"#{self}st"
+			when 2
+				"#{self}nd"
+			when 3
+				"#{self}rd"
+			else
+				"#{self}th"
+		end
+	end
 end
 
 class Hash
-
 	def assert_valid_keys(*valid_keys)
 		unknown_keys = keys - [valid_keys].flatten
 		raise(
 			ArgumentError, 
 			"Unknown key(s): #{unknown_keys.join(", ")}"
 		) unless unknown_keys.empty?
+	end
+
+	# Return a new hash with all keys converted to symbols.
+	def symbolize_keys
+		inject({}) do |options, (key, value)|
+			options[key.to_sym || key] = value
+			options
+		end
+	end
+
+	# Destructively convert all keys to symbols.
+	def symbolize_keys!
+		self.replace(self.symbolize_keys)
+	end
+
+	def has_keys?( *keys)
+		not keys.find{|k| return false unless self.has_key?(k)}
+	end
+end
+
+module Enumerable
+	def each_n( n, partial=false)
+		raise ArgumentError("Step must be >= 1") if n < 1
+
+		buf = []
+		self.each_with_index do |item, idx|
+			buf << item
+			if 0 == (idx+1) % n
+				yield *buf
+				buf.clear
+			end
+		end
+
+		yield *buf if partial and not buf.empty?
+	end
+
+	def map_with_index
+		rv = Array.new(self.size)
+		self.each_with_index do |item, idx|
+			rv[idx] = yield item, idx
+		end
+		rv
+	end
+
+	def map_with_index!
+		self.each_with_index do |item, idx|
+			self[ idx] = yield item, idx
+		end
 	end
 end
 

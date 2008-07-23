@@ -55,3 +55,23 @@ describe Regexp do
 		end
 	end
 end
+
+
+describe Enumerable do
+	describe "each_n" do
+		it "should yield each n items, ignoring any remainder items by
+		default".compact! do
+			yields = []
+			(0..10).to_a.each_n(3){|*args| yields << args}
+
+			yields.should == [[0,1,2], [3,4,5], [6,7,8]]
+		end
+
+		it "should yield remainder items if so specified" do
+			yields = []
+			(0..10).to_a.each_n(3, true){|*args| yields << args}
+
+			yields.should == [[0,1,2], [3,4,5], [6,7,8], [9, 10]]
+		end
+	end
+end

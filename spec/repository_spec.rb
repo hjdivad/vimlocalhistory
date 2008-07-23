@@ -500,6 +500,158 @@ describe VimLocalHistory::Repository do
 	end
 
 
+	describe "(accessing the repository)" do
+		before(:each) do
+			@repo = VimLocalHistory::Repository.new({
+				:location => './test/with-repo',
+				:log => './test/log',
+			})
+			@temp = Tempfile.new('vlh-spec').path
+			FileUtils.cp './spec/assets/sample_file.txt', @temp
+
+			# Revisions are written in reverse -- we're thinking of revision
+			# here as relative to the current file, with rev 0 being the current
+			# version, rev 1 being the prior version, etc.
+			(0..3).to_a.reverse.each do |rev|
+				File.open('spec/assets/sample_file.txt','w') do |f|
+					f.write("revision #{rev}")
+				end
+				@repo.commit_file 'spec/assets/sample_file.txt'
+			end
+		end
+
+		after(:each) do
+			FileUtils.cp @temp, './spec/assets/sample_file.txt'
+		end
+
+
+		describe "checkout_file" do
+			it "should checkout the expected revision to a temp file (for
+			revision 1)".compact! do
+				path = @repo.checkout_file('spec/assets/sample_file.txt', 1)
+
+				File.should be_exist( path)
+				File.read(path).should == 'revision 1'
+			end
+
+			it "should checkout the expected revision to a temp file (for
+			revision 3)".compact! do
+				path = @repo.checkout_file('spec/assets/sample_file.txt', 3)
+
+				File.should be_exist( path)
+				File.read(path).should == 'revision 3'
+			end
+
+			it "should return nil for revisions < 0" do
+				path = @repo.checkout_file('spec/assets/sample_file.txt', -1)
+
+				path.should be_equal(nil)
+			end
+
+			it "should return nil for revisions > the maximum number of
+			revisions for the file".compact! do
+				path = @repo.checkout_file('spec/assets/sample_file.txt', 7)
+
+				path.should be_equal(nil)
+			end
+
+			it "should return nil for nil paths"
+
+			it "should return nil for paths never committed"
+		end
+
+		describe "revert_file" do
+			it "should revert the file so that it matches its state at the
+			expected revision, and commit these changes (for revision
+			1) and return true".compact! do
+				rv = @repo.revert_file( 'spec/assets/sample_file.txt', 1)
+
+				rv.should be_equal(true)
+				File.read('spec/assets/sample_file.txt').should == 'revision 1'
+				
+				git_revs( @repo.location, './spec/assets/sample_file.txt').
+					should have_exactly(5).commits
+			end
+
+			it "should revert the file so that it matches its state at the
+			expected revision, and commit these changes (for revision
+			3) and return true".compact! do
+				rv = @repo.revert_file( 'spec/assets/sample_file.txt', 3)
+
+				rv.should be_equal(true)
+				File.read('spec/assets/sample_file.txt').should == 'revision 3'
+
+				git_revs( @repo.location, './spec/assets/sample_file.txt').
+					should have_exactly(5).commits
+			end
+
+			it "should do nothing for revision = 0, but raise no error (and
+			return false)".compact! do
+				rv = @repo.revert_file( 'spec/assets/sample_file.txt', 0)
+
+				rv.should be_equal(false)
+				File.read('spec/assets/sample_file.txt').should == 'revision 0'
+
+				git_revs( @repo.location, './spec/assets/sample_file.txt').
+					should have_exactly(4).commits
+			end
+
+			it "should do nothing for nil paths, but raise no error (and return
+			false)".compact! do
+				rv = @repo.revert_file( nil, 3)
+
+				rv.should be_equal(false)
+				File.read('spec/assets/sample_file.txt').should == 'revision 0'
+
+				git_revs( @repo.location, './spec/assets/sample_file.txt').
+					should have_exactly(4).commits
+			end
+
+			it "should do nothing for paths never committed, but raise no error
+			(and return false)".compact!
+
+			it "should raise an ArgumentError for revisions < 0" do
+				lambda {
+					@repo.revert_file('spec/assets/sample_file.txt', -1)
+				}.should raise_error( ArgumentError)
+			end
+
+			it "should raise an error for revisions > the maximum number of
+			revisions for this file".compact! do
+				lambda {
+					@repo.revert_file('spec/assets/sample_file.txt', 7)
+				}.should raise_error( ArgumentError)
+			end
+		end
+
+		describe "revisions_information" do
+			it "should consider each option a format placeholder for git
+			rev-list, and return the information as a hash, along with the
+			implied key :commit".compact! do
+				rev_info = @repo.revision_information( 
+					'spec/assets/sample_file.txt', 
+					%w(s)
+				)
+			
+				rev_info.size.should == 4
+
+				rev_info.each do |entry|
+					entry.should have_keys(:commit, :s)
+					entry[:commit].should =~ /[a-z0-9]{40}/i
+					entry[:s].should == 'Commit from VimLocalHistory'
+				end
+			end
+			
+			it "should return an empty array for nil paths" do
+				@repo.revision_information(nil, %w(s)).should == []
+			end
+
+			it "should return an empty array for paths that were never
+			committed".compact!
+		end
+	end
+
+
 	describe "(options hash)" do
 		it "should accept keys :location, :exclude_paths, :exclude_files and
 		:log".compact! do

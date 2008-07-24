@@ -20,6 +20,8 @@ alias todo='git-branch-todos $@'
 alias todo-tests='grep -R TODO test/'
 
 
+alias git-commit-fromearl='git commit --author "Earl Barr <barr@cs.ucdavis.edu>"'
+
 # utility -- these may get promoted to ~/.bash_* or ~/bin later
 alias git-branch-current='git-branch --no-color | egrep "^\*" | cut -c 3-'
 

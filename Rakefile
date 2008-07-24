@@ -15,28 +15,47 @@ VLH_VERSION='0.1'
 
 
 install_source = Dir.glob('./src/*')
-install_target = ENV['INSTALL_TARGET'] || "#{ENV['HOME']}/.vim/plugin"
+install_doc = "README"
+install_root_target = "#{ENV['HOME']}/.vim"
+install_plugin_target = ENV['INSTALL_TARGET'] || "#{install_root_target}/plugin"
+install_doc_target = "#{install_root_target}/doc"
+
 installed_names = install_source.map do |path|
 	rel_path = path.chomps( File.dirname(path)).chomps('/')
-	"#{install_target}/#{rel_path}"
-end
+	"#{install_plugin_target}/#{rel_path}"
+end + ["#{install_doc_target}/vlh.txt"]
 
-directory install_target
+directory install_plugin_target
+directory install_doc_target
 
 
 ########################################################################
 # Installation and packaging tasks
 desc <<-EOS
-	Install The plugin to ~/.vim/plugin
+	Install The plugin to ~/.vim/plugin; docs to ~/.vim/doc.  Builds helptags
+	for documentations.
 EOS
-task :install => [install_target] do
-	FileUtils.cp_r install_source, install_target
+task :install => [:install_plugin, :install_doc, :retag_docs]
+
+task :install_plugin => install_plugin_target do
+	FileUtils.cp_r install_source, install_plugin_target
 end
+
+task :install_doc => install_doc_target do
+	FileUtils.cp install_doc, "#{install_doc_target}/vlh.txt"
+end
+
+task :retag_docs => install_doc_target do
+	system "vim --noplugin -u NONE +\"helptags #{install_doc_target}\" +\"quit\""
+end
+
 
 desc <<-EOS
 	Removes the plugin from ~/.vim/plugin
 EOS
-task :uninstall do
+task :uninstall => [:uninstall_files, :retag_docs]
+
+task :uninstall_files do
 	FileUtils.rm_r installed_names, :force => true
 end
 

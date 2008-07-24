@@ -1,8 +1,17 @@
 To install, copy the contents of plugin to your user-specific vim plugin
-directory, probably ~/.vim/plugin/
+directory, probably ~/.vim/plugin/.
 
-Then make sure to edit your ~/.vimrc to include
+To install documentation, copy README to your vim documentations directory,
+probably ~/.vim/doc/.  After copying the documentation, execute ":helptags
+~/.vim/doc" from within vim to make the documentation accessible.
 
-let g:vlh_repository_dir = "/path/where/youd/like/to/store/localhistory"
+	rake install
+
+accomplishes all of this for you.
+
+
+Once VLH is installed, make sure to edit your ~/.vimrc to include
+
+	let g:vlh_repository_dir = "/path/where/youd/like/to/store/localhistory"
 
 I suggest using /home/$USER/.vim/localhistory

@@ -230,6 +230,11 @@ class VimLocalHistory::Repository
 		end
 	end
 
+	#TODO: chown file to userid if sudo'd
+	#		simplest approach chown file to owner of #{location}
+	#
+	#		File.chown
+	#		File.stat
 	def copy_local_file_to_repository( path)
 		repo_dir = File.dirname("#{location}/#{path}")
 

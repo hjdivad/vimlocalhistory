@@ -4,6 +4,7 @@
 		Contents:
 			Commands.................................|vlh-commands|
 			Configuration............................|vlh-configuration|
+			Release notes............................|vlh-release-notes|
 			TODO.....................................|vlh-todo|
 			Alternatives.............................|vlh-alternatives|
 
@@ -43,17 +44,46 @@ g:vlh_log_dir
 
 }}}
 ==============================================================================
-TODO														*vlh-todo*	{{{1
+RELEASE-NOTES 					*vlh-release-notes*	{{{
 
-Comment stuff
-	vlh
-	vim_wrapper
-	repository
-	lang_utils
+}}}
+==============================================================================
+TODO							*vlh-todo*	{{{1
 
 Test sudo vim /blah
 	I think it will still write to ~/.vim/localhistory but with root
 	permissions, causing problems later (perhaps on git gc)
+
+Think about security
+	We may want/need to chmod 600 any files we write since they may be
+	sensitive and it would perhaps be unwise to rely on the user's umask,
+	especially if we're going to write sudo'd files (although presumably the
+	user needs to sudo not to read, but to write, so it's mostly safe to keep
+	copies of those around).
+		A possible problem here comes when we restore the files, we'll want to
+		restore the permissions properly.  Perhaps the thing to do is simply
+		to punt on the issue and just make a note in this README?
+
+VLH* completion
+	add ++.. from git-lg
+
+Deal with slow VLH* autocomplete .. maybe
+
+Fix VLHDiff
+	It doesn't work well with, e.g. project (the big problem seems to be the
+		use of wincmd R)
+	We need to set nodiff after the diff'd buffer closes
+
+Fix VLHDiff/Open
+	set ft  on these so we get syntax highlighting (and any other stuff in
+	ftplugin).  Maybe we should have the write suffix as well (e.g. .rb)
+
+Stupid Bug (check [and fix])
+	create_command C_1, with completion R
+	create_command C_2 (with same name), with no completion
+		The command C_2 will now (probably) be using C_1's completion R.
+		command completion should be cleared when create_command is called to
+		overwrite an old command (i.e., with :force => true)
 
 File history buffer
 	view (git lg ...)
@@ -61,6 +91,8 @@ File history buffer
 	diff
 	restore
 	edit msg
+		- replace the buffer with another buffer that just has the commit msg
+		- on save, kill the new buffer and show the previous one again
 
 	make readonly
 
@@ -71,15 +103,28 @@ File history buffer
 	(open/diff/restore/edit msg)
 
 Implement scp://*
+	g:vlh_scp_root_path  default to '.remotes'
+	treat those as roots, e.g.
+		/home
+		/.remotes
+			/myhost1
+				/
+			/myhost2
 
-Write a vim help file
 Cleanup this Readme
+	do the TODOs ( e.g., write the descriptions)
+	write a little more about the alternatives
 
 Deal with project-todo and project-fixme
 
 Post to vim./mailing list
 Maybe package for debian
 	http://pkg-vim.alioth.debian.org/vim-policy.txt
+Perhaps also post to github
+	-configure hades to autopush to github
+	-add a readme for submitting patches
+		in email format
+		via pull
 
 
 ------------------------------------------------------------------------
@@ -90,6 +135,13 @@ cleanup disk space feature
 delete commit feature
 unify local history and repository history
 	(e.g. support diffs of some local history revision against a repo. version)
+load undo history
+	It might be cool to run a command that configures the undo stack to let
+	you undo/redo through revisions.  So if your undo stack is currently 
+		A -> B ->C
+	we could (perhaps) prepend it with one item per revision, so that undoing
+	past A essentially resulted in replacing the entire buffer with the
+	previous version of the file
 
 
 }}}

@@ -12,6 +12,9 @@ module VimLocalHistory end
 class VimLocalHistory::VimIntegration
 
 	def initialize
+		# We pass lambdas for the variables so that we recognize any changes the
+		# user makes at runtime.  e.g., the user can configure
+		# g:vlh_repository_dir without having to restart vim.
 		@repository = VimLocalHistory::Repository.new({
 			:location => lambda {
 				Vim::get_variable( 'g:vlh_repository_dir')
@@ -27,12 +30,13 @@ class VimLocalHistory::VimIntegration
 
 		setup_vim_event_hooks
 		setup_vim_commands
-
 	rescue => error
 		report_error( error)
 	end
 
 	def setup_vim_event_hooks
+		# This is where we make sure to track each version of each file when
+		# they're written
 		Vim::on(:BufWritePost, 'VimLocalHistory') do 
 			begin
 				if @repository.enabled?
@@ -92,7 +96,7 @@ class VimLocalHistory::VimIntegration
 
 		#FIXME: this leaks tempfiles
 		#	it would be good to clean them up either on bufclose
-		#	or on vim exit
+		#	and/or on vim exit
 		Vim::create_command(:VLHOpen, options) do |arg|
 			revision = arg.to_i
 			path = @repository.checkout_file(Vim::Buffer.current.name, revision)

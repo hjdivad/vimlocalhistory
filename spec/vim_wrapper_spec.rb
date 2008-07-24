@@ -218,7 +218,7 @@ describe 'Vim Wrapper' do
 		end
 
 		it "should allow legal options (:arity, :force, :completion)" do
-			Vim::should_receive( :command).exactly( :once)
+			Vim::should_receive( :command).exactly( :twice)
 			Vim::should_receive( :evaluate).at_least( :once)
 			lambda {
 				Vim::create_command( 
@@ -226,6 +226,11 @@ describe 'Vim Wrapper' do
 					:arity => 2, 
 					:completion => lambda{}, 
 					:force => true
+				){}
+
+				Vim::create_command( 
+					:MyCommand, 
+					:arity => '+'
 				){}
 			}.should_not raise_error
 		end
@@ -244,7 +249,7 @@ describe 'Vim Wrapper' do
 		end
 
 		it "should raise an ArgumentError if :arity is passed and is not an
-		Integer".compact! do
+		Integer or one of the special strings '?', '*'".compact! do
 			lambda {
 				Vim::create_command( :MyCommand, :arity => 'foo'){}
 			}.should raise_error( ArgumentError)

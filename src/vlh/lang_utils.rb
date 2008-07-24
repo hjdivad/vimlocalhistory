@@ -16,6 +16,17 @@ class String
 		self[ -(suffix.size)..-1] == suffix
 	end
 
+	# Strips newlines, leading whitespace in newlines, and trailing and leading
+	# whitespace.  Convenient for writing long single-line strings across
+	# multiple lines of source.
+	#
+	# Examples:
+	#	  >> "
+	#	  	here is a single line string,
+	#	  	specified over two lines
+	#	  ".compact!
+	#	  => "here is a single line string,specified over two lines"
+	# 	
 	def compact!
 		self.strip!
 		self.gsub! /^\s+/, ' '
@@ -26,6 +37,9 @@ end
 
 
 class Regexp
+	# Combines this Regexp with +other_regex+ with a logical OR.  An
+	# +UnmatchedOptionsError+ is raised if +other_regex+ doesn't have the same
+	# flags as this Regexp.
 	def |( other_regex)
 		raise UnmatchedOptionsError.new("
 			/#{self.source}/ had options #{self.options}, but
@@ -34,6 +48,21 @@ class Regexp
 
 		Regexp.new(
 			"(?:#{self.source})|(?:#{other_regex.source})",
+			self.options
+		)
+	end
+
+	# Combines this Regexp with +other_regex+ with a logical AND.  An
+	# +UnmatchedOptionsError+ is raised if +other_regex+ doesn't have the same
+	# flags as this Regexp.
+	def +( other_regex)
+		raise("
+			/#{self.source}/ had options #{self.options}, but
+			/#{other_regex.source}/ had options #{other_regex.options}
+		".compact!) unless self.options == other_regex.options
+
+		Regexp.new(
+			"(?:#{self.source})(?:#{other_regex.source})",
 			self.options
 		)
 	end
@@ -101,6 +130,9 @@ class Hash
 end
 
 module Enumerable
+	# as #each but look through items +n+ at a time
+	# if +partial+ is a true value then yield to the block with the remaining
+	# itmes if +__self__.size+ % +n+ != 0
 	def each_n( n, partial=false)
 		raise ArgumentError("Step must be >= 1") if n < 1
 

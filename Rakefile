@@ -16,9 +16,9 @@ VLH_VERSION='0.1'
 
 install_source = Dir.glob('./src/*')
 install_doc = "README"
-install_root_target = "#{ENV['HOME']}/.vim"
-install_plugin_target = ENV['INSTALL_TARGET'] || "#{install_root_target}/plugin"
-install_doc_target = "#{install_root_target}/doc"
+install_root =  ENV['INSTALL_ROOT'] || "#{ENV['HOME']}/.vim"
+install_plugin_target = "#{install_root}/plugin"
+install_doc_target = "#{install_root}/doc"
 
 installed_names = install_source.map do |path|
 	rel_path = path.chomps( File.dirname(path)).chomps('/')
@@ -33,7 +33,7 @@ directory install_doc_target
 # Installation and packaging tasks
 desc <<-EOS
 	Install The plugin to ~/.vim/plugin; docs to ~/.vim/doc.  Builds helptags
-	for documentations.
+	for documentation.
 EOS
 task :install => [:install_plugin, :install_doc, :retag_docs]
 

@@ -3,6 +3,6 @@ directory, probably ~/.vim/plugin/
 
 Then make sure to edit your ~/.vimrc to include
 
-let g:vlh_repostiroy_dir = "/path/where/youd/like/to/store/localhistory"
+let g:vlh_repository_dir = "/path/where/youd/like/to/store/localhistory"
 
 I suggest using /home/$USER/.vim/localhistory

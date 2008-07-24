@@ -21,13 +21,15 @@ installed_names = install_source.map do |path|
 	"#{install_target}/#{rel_path}"
 end
 
+directory install_target
+
 
 ########################################################################
 # Installation and packaging tasks
 desc <<-EOS
 	Install The plugin to ~/.vim/plugin
 EOS
-task :install do
+task :install => [install_target] do
 	FileUtils.cp_r install_source, install_target
 end
 

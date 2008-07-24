@@ -71,7 +71,7 @@ class VimLocalHistory::Repository
 	end
 
 	def initialize_log( path)
-		if path
+		if path and not path.empty?
 			FileUtils.mkdir_p path
 			@log = Logger.new( "#{path}/vlh.log", 10, 1.megabyte)
 		else

@@ -1,12 +1,12 @@
-			Plugin for (TODO: synopsis)
+	Plugin for (TODO: synopsis)
 
-													*vlh* *vimlocalhistory*
-		Contents:
-			Commands.................................|vlh-commands|
-			Configuration............................|vlh-configuration|
-			Release notes............................|vlh-release-notes|
-			TODO.....................................|vlh-todo|
-			Alternatives.............................|vlh-alternatives|
+						*vlh* *vimlocalhistory*
+	Contents:
+		Commands.................................|vlh-commands|
+		Configuration............................|vlh-configuration|
+		Release notes............................|vlh-release-notes|
+		TODO.....................................|vlh-todo|
+		Alternatives.............................|vlh-alternatives|
 
 
 TODO: description
@@ -16,7 +16,7 @@ poor man's "local history" (a lá the eclipse feature with the same name).
 
 
 ==============================================================================
-COMMANDS												*vlh-commands*	{{{1
+COMMANDS						*vlh-commands*	{{{1
 
 VLHDiff
 VLHOpen
@@ -31,7 +31,7 @@ History
 
 }}}
 ==============================================================================
-CONFIGURATION 										*vlh-configuration*	{{{
+CONFIGURATION 					*vlh-configuration*	{{{
 
 g:vlh_respository_dir
 g:vlh_exclude_file_pattern
@@ -44,7 +44,7 @@ g:vlh_log_dir
 
 }}}
 ==============================================================================
-RELEASE-NOTES 					*vlh-release-notes*	{{{
+RELEASE NOTES					*vlh-release-notes*	{{{1
 
 }}}
 ==============================================================================
@@ -146,7 +146,7 @@ load undo history
 
 }}}
 ==============================================================================
-ALTERNATIVES										*vlh-alternatives*	{{{1
+ALTERNATIVES					*vlh-alternatives*	{{{1
 
 rcsvers.vim
 http://vim.sourceforge.net/scripts/script.php?script_id=563
@@ -167,4 +167,4 @@ of files.
 
 
 
-vim:ft=help ts=4 sw=4 noexpandtab tw=78 foldmethod=marker
+vim:ft=help ts=8 sw=8 noexpandtab tw=78 foldmethod=marker

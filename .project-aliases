@@ -3,8 +3,18 @@ function grep_project {
 	grep --color -i --exclude "*.swp" -R "$1" .
 }
 
+function single_spec {
+	if [ -f "$1" ]
+		then
+			rake spec SPEC="$1"
+		else
+			rake spec SPEC_OPTS="-c -e '$1'"
+	fi
+}
+
 
 alias gp='grep_project'
+alias sp='single_spec'
 
 #TODO: get path to work properly.  It seems to work initially, but when the file
 # type changes, path gets overwritten and src/** gets trashed

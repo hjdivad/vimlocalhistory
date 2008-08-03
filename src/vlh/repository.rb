@@ -103,6 +103,10 @@ class VimLocalHistory::Repository
 		return [] unless path
 
 		path = repo_relative_path( path)
+		return [] unless File.exists?(
+			"#{location}/#{path}"
+		)
+
 		format = options.map{|o| "%#{o}"}.join('%n')
 		output = `cd #{location} &&
 			git rev-list -n 10 --pretty=format:"#{format}" HEAD #{path}`
@@ -155,7 +159,7 @@ class VimLocalHistory::Repository
 
 			FileUtils.cp "#{location}/#{repo_path}", path
 			true
-		end
+		end or false
 	end
 
 
@@ -230,16 +234,35 @@ class VimLocalHistory::Repository
 		end
 	end
 
-	#TODO: chown file to userid if sudo'd
-	#		simplest approach chown file to owner of #{location}
-	#
-	#		File.chown
-	#		File.stat
 	def copy_local_file_to_repository( path)
 		repo_dir = File.dirname("#{location}/#{path}")
 
 		FileUtils.mkdir_p repo_dir
 		FileUtils.cp path, repo_dir
+
+		# set the file owner equal to the owner of +location+ -- this way copies
+		# of files sudo'd are owned by the user (so, e.g. `git gc` won't fail)
+		stat = File.stat location
+		file = path[File.dirname(path).size+1..-1]
+
+		File.chown stat.uid, stat.gid, "#{repo_dir}/#{file}"
+
+		# mkdir_p, above, may have created new directories while sudo'd, so we
+		# need to chown those directories as well.  This may need to get changed
+		# if it's too slow in the common case, but File.chmod_r may be too slow
+		# for large pre-existing trees that already have files.
+		path_array = path.chomps(File::SEPARATOR).split( File::SEPARATOR)
+		while not path_array.empty?
+			dir = "#{location}/#{File.join( path_array)}"
+			File.chown stat.uid, stat.gid, dir
+			File.chmod 0o700, dir
+			path_array.pop
+		end
+
+		# Because we may have sudo vim'd a file, we'll want to chmod 600 the
+		# copy, although this is really rather paranoid as the user shouldn't be
+		# exposing their repo directory anyway.
+		File.chmod 0o600, "#{repo_dir}/#{file}"
 	end
 
 	def copy_scp_path_to_repository( path)
@@ -292,7 +315,11 @@ class VimLocalHistory::Repository
 	end
 
 	def with_path_and_revisions( path)
+		return nil unless path
+
 		path = repo_relative_path( path)
+		return nil unless File.exists? "#{location}/#{path}"
+
 		revs = `cd #{location} && git rev-list HEAD #{path}`.split("\n")
 		yield path, revs
 	end

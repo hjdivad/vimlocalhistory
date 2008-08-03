@@ -50,19 +50,20 @@ RELEASE NOTES					*vlh-release-notes*	{{{1
 ==============================================================================
 TODO							*vlh-todo*	{{{1
 
-Test sudo vim /blah
-	I think it will still write to ~/.vim/localhistory but with root
-	permissions, causing problems later (perhaps on git gc)
+Cleanup this Readme
+	do the TODOs ( e.g., write the descriptions)
+	write a little more about the alternatives
 
-Think about security
-	We may want/need to chmod 600 any files we write since they may be
-	sensitive and it would perhaps be unwise to rely on the user's umask,
-	especially if we're going to write sudo'd files (although presumably the
-	user needs to sudo not to read, but to write, so it's mostly safe to keep
-	copies of those around).
-		A possible problem here comes when we restore the files, we'll want to
-		restore the permissions properly.  Perhaps the thing to do is simply
-		to punt on the issue and just make a note in this README?
+Deal with project-todo and project-fixme
+
+Post to vim./mailing list
+Maybe package for debian
+	http://pkg-vim.alioth.debian.org/vim-policy.txt
+Perhaps also post to github
+	-configure hades to autopush to github
+	-add a readme for submitting patches
+		in email format
+		via pull
 
 VLH* completion
 	add ++.. from git-lg
@@ -74,16 +75,14 @@ Fix VLHDiff
 		use of wincmd R)
 	We need to set nodiff after the diff'd buffer closes
 
-Fix VLHDiff/Open
-	set ft  on these so we get syntax highlighting (and any other stuff in
-	ftplugin).  Maybe we should have the write suffix as well (e.g. .rb)
-
-Stupid Bug (check [and fix])
-	create_command C_1, with completion R
-	create_command C_2 (with same name), with no completion
-		The command C_2 will now (probably) be using C_1's completion R.
-		command completion should be cleared when create_command is called to
-		overwrite an old command (i.e., with :force => true)
+Implement scp://*
+	g:vlh_scp_root_path  default to '.remotes'
+	treat those as roots, e.g.
+		/home
+		/.remotes
+			/myhost1
+				/
+			/myhost2
 
 File history buffer
 	view (git lg ...)
@@ -101,30 +100,6 @@ File history buffer
 	In addition to syntax highlighting (commits, authors, etc.) also highlight
 	the selected item (several lines), to make clear the target of commands
 	(open/diff/restore/edit msg)
-
-Implement scp://*
-	g:vlh_scp_root_path  default to '.remotes'
-	treat those as roots, e.g.
-		/home
-		/.remotes
-			/myhost1
-				/
-			/myhost2
-
-Cleanup this Readme
-	do the TODOs ( e.g., write the descriptions)
-	write a little more about the alternatives
-
-Deal with project-todo and project-fixme
-
-Post to vim./mailing list
-Maybe package for debian
-	http://pkg-vim.alioth.debian.org/vim-policy.txt
-Perhaps also post to github
-	-configure hades to autopush to github
-	-add a readme for submitting patches
-		in email format
-		via pull
 
 
 ------------------------------------------------------------------------

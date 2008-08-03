@@ -159,6 +159,24 @@ describe VimLocalHistory::Repository do
 			}.should raise_error(Errno::ENOENT)
 		end
 
+		it "should ensure the saved copies of committed files have the same
+		ownership as the repo location (sudo this spec to test)".compact! do
+			# Make sure that the location isn't also owned by root, or the test
+			# will be somewhat pointless
+			stat_pwd = File.stat FileUtils.pwd
+			File.chown stat_pwd.uid, stat_pwd.gid, @repo.location
+
+			@repo.commit_file './spec/assets/sample_file.txt'
+
+			stat_repo = File.stat @repo.location
+			stat_file = File.stat(
+				"#{@repo.location}/#{FileUtils.pwd}/spec/assets/sample_file.txt"
+			)
+
+			stat_file.uid.should == stat_repo.uid
+			stat_file.gid.should == stat_repo.gid
+		end
+
 		it "should warn about an unimplemented feature if asked to commit an
 		scp'd file".compact! do
 			path = scp_path './spec/assets/sample_file.txt'
@@ -555,9 +573,17 @@ describe VimLocalHistory::Repository do
 				path.should be_equal(nil)
 			end
 
-			it "should return nil for nil paths"
+			it "should return nil for nil paths" do
+				path = @repo.checkout_file(nil, 7)
 
-			it "should return nil for paths never committed"
+				path.should be_equal(nil)
+			end
+
+			it "should return nil for paths never committed" do
+				path = @repo.checkout_file('not/a/real/path', 0)
+
+				path.should be_equal(nil)
+			end
 		end
 
 		describe "revert_file" do
@@ -608,7 +634,15 @@ describe VimLocalHistory::Repository do
 			end
 
 			it "should do nothing for paths never committed, but raise no error
-			(and return false)".compact!
+			(and return false)".compact! do
+				rv = @repo.revert_file( 'not/a/real/path', 1)
+
+				rv.should be_equal(false)
+				File.read('spec/assets/sample_file.txt').should == 'revision 0'
+
+				git_revs( @repo.location, './spec/assets/sample_file.txt').
+					should have_exactly(4).commits
+			end
 
 			it "should raise an ArgumentError for revisions < 0" do
 				lambda {
@@ -647,7 +681,9 @@ describe VimLocalHistory::Repository do
 			end
 
 			it "should return an empty array for paths that were never
-			committed".compact!
+			committed".compact! do
+				@repo.revision_information('not/real/path', %w(s)).should == []
+			end
 		end
 	end
 

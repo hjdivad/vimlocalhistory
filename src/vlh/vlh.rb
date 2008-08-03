@@ -85,13 +85,14 @@ class VimLocalHistory::VimIntegration
 
 		Vim::create_command(:VLHDiff, options) do |arg|
 			revision = arg.to_i
+			ft = Vim::get_variable('&filetype')
+
 			path = @repository.checkout_file(Vim::Buffer.current.name, revision)
 			Vim::diffsplit( path, :vertical => true)
-			#TODO: these are probably not very generic -- i.e., they may not
-			# work well in cases where the current tab already has more than one
-			# window open
-			Vim::command("wincmd R")
-			Vim::command("wincmd h")
+			Vim::set_variable('&filetype', ft)
+
+			# Switch so that the new window (previous file) is on the right
+			Vim::command("wincmd x")
 		end
 
 		#FIXME: this leaks tempfiles
@@ -99,8 +100,11 @@ class VimLocalHistory::VimIntegration
 		#	and/or on vim exit
 		Vim::create_command(:VLHOpen, options) do |arg|
 			revision = arg.to_i
+			ft = Vim::get_variable('&filetype')
+
 			path = @repository.checkout_file(Vim::Buffer.current.name, revision)
 			Vim::edit_file( path)
+			Vim::set_variable('&filetype', ft)
 		end
 
 		Vim::create_command(:VLHReplace, options) do |arg|

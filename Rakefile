@@ -101,12 +101,13 @@ task :test do
 	pwd = Dir.pwd
 	repo_path = File.expand_path('./test/repo')
 	test_vim = File.expand_path('src/vimlocalhistory.vim')
+	test_vimrc = File.expand_path('test_vimrc.vim')
 
 	system 'cd /tmp/ && vim -u NONE ' +
 			'+"let g:vlh_repository_dir=\'' + repo_path + '\'" ' +
 			'+"let g:vlh_exclude_file_pattern=\'.*\.ignore\'" ' +
 			'+"let g:vlh_exclude_path_pattern=\'\/ignore\/\'" ' +
-			'+"so ' + test_vim + '" && cd ' + pwd
+			'+"so ' + test_vim + '" +"so ' + test_vimrc + '" && cd ' + pwd
 end
 Spec::Rake::SpecTask.new do |t|
 	t.ruby_opts = ['-Isrc']

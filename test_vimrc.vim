@@ -1,0 +1,3 @@
+set nocompatible
+filetype on
+

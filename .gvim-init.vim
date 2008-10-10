@@ -20,5 +20,5 @@ tabdo Project
 tabdo foldopen!
 
 " Full screen (as best we can)
-winpos 0 0
-set lines=61 columns=238
+"winpos 0 0
+set lines=74 columns=272

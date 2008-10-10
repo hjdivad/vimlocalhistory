@@ -65,6 +65,11 @@ Perhaps also post to github
 		in email format
 		via pull
 
+Add Tagging
+
+Periodic gc or something
+stripping out older revs when repo gets too big
+
 VLH* completion
 	add ++.. from git-lg
 

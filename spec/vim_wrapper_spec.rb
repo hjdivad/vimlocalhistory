@@ -303,7 +303,6 @@ describe 'Vim Wrapper' do
 		end
 
 
-		#TODO: specs for callback & completion callback
 		describe 'callbacks' do
 			it "should call the passed block when command_callback is called
 			with the command name (when the command name given was a

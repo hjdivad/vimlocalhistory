@@ -12,9 +12,19 @@ function single_spec {
 	fi
 }
 
+function single_spec_debug {
+	if [ -f "$1" ]
+		then
+			rdebug rake -- spec SPEC="$1"
+		else
+			rdebug rake -- spec SPEC_OPTS="-c -e '$1'"
+	fi
+}
+
 
 alias gp='grep_project'
 alias sp='single_spec'
+alias sd='single_spec_debug'
 
 #TODO: get path to work properly.  It seems to work initially, but when the file
 # type changes, path gets overwritten and src/** gets trashed

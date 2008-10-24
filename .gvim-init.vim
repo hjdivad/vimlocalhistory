@@ -19,6 +19,4 @@ Project ./.vimproject
 tabdo Project
 tabdo foldopen!
 
-" Full screen (as best we can)
-"winpos 0 0
-set lines=74 columns=272
+set lines=74 columns=136

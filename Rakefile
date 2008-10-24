@@ -11,7 +11,7 @@ require 'spec/rake/spectask'
 require 'vlh/lang_utils'
 
 
-VLH_VERSION='0.1'
+VLH_VERSION='0.2'
 
 
 install_source = Dir.glob('./src/*')
@@ -74,7 +74,7 @@ task :tarball do
 	system "tar cf vimlocalhistory-#{VLH_VERSION}.tar
 		--transform='s,^src/(.*),plugin/\\1,x' src/*".compact!
 
-	system "tar rf vimlocalhistory-#{VLH_VERSION}.tar INSTALL"
+	system "tar rf vimlocalhistory-#{VLH_VERSION}.tar README"
 	system "gzip vimlocalhistory-#{VLH_VERSION}.tar"
 end
 

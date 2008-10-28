@@ -7,6 +7,7 @@ describe 'Vim Wrapper' do
 	include VimLocalHistory::SpecHelper
 
 	before(:all) do
+		Object.send(:remove_const, :Vim) if Object.const_defined?(:Vim)
 		Vim = mock("VIM")
 
 		# We create a no-op method command so that initialization is expected,
